@@ -1,0 +1,4 @@
+.env
+node_modules
+shadcn_server/node_modules
+.next
