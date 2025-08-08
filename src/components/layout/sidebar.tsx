@@ -106,6 +106,7 @@ export function Sidebar() {
       <div
         className={cn(
           'fixed left-0 top-0 z-50 h-full w-64 transform bg-white border-r border-gray-200 transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-0',
+          'flex flex-col min-h-0',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full',
           theme === 'dark' && 'bg-gray-900 border-gray-700'
         )}
@@ -150,7 +151,7 @@ export function Sidebar() {
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-semibold">
-              {user?.name.charAt(0)}
+              {(user?.name || 'K').toString().charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
@@ -164,7 +165,7 @@ export function Sidebar() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 py-6 space-y-2">
+        <nav className="flex-1 overflow-y-auto px-4 py-6 space-y-2">
           {navigationItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
@@ -181,8 +182,12 @@ export function Sidebar() {
                 )}
                 onClick={() => setSidebarOpen(false)}
               >
-                <Icon className="h-5 w-5" />
-                <span>{item.title}</span>
+                {Icon ? (
+                  <Icon className="h-5 w-5 shrink-0" />
+                ) : (
+                  <span className="h-5 w-5 shrink-0" />
+                )}
+                <span className="truncate">{item.title}</span>
               </Link>
             );
           })}
