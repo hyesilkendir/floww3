@@ -26,13 +26,16 @@ export const recurringPeriodEnum = pgEnum('recurring_period', ['daily', 'weekly'
 export const users = pgTable('users', {
   id: varchar('id', { length: 191 }).primaryKey(),
   email: varchar('email', { length: 255 }).notNull().unique(),
+  username: varchar('username', { length: 50 }).notNull().unique(),
   password: varchar('password', { length: 255 }).notNull(),
   name: varchar('name', { length: 255 }).notNull(),
   companyName: varchar('company_name', { length: 255 }).notNull(),
+  isVerified: boolean('is_verified').default(false).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 }, (table) => ({
   emailIdx: uniqueIndex('email_idx').on(table.email),
+  usernameIdx: uniqueIndex('username_idx').on(table.username),
 }));
 
 // Currencies table
@@ -244,6 +247,19 @@ export const tevkifatRates = pgTable('tevkifat_rates', {
 }, (table) => ({
   codeIdx: uniqueIndex('code_idx').on(table.code),
   isActiveIdx: index('is_active_idx').on(table.isActive),
+}));
+
+// Email verification tokens
+export const verificationTokens = pgTable('verification_tokens', {
+  id: varchar('id', { length: 191 }).primaryKey(),
+  userId: varchar('user_id', { length: 191 }).notNull(),
+  token: varchar('token', { length: 255 }).notNull().unique(),
+  expiresAt: timestamp('expires_at').notNull(),
+  usedAt: timestamp('used_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => ({
+  tokenIdx: uniqueIndex('verification_token_idx').on(table.token),
+  userIdIdx: index('verification_user_id_idx').on(table.userId),
 }));
 
 // Relations

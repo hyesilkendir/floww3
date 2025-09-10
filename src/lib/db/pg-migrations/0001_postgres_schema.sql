@@ -14,9 +14,11 @@ CREATE TYPE recurring_period AS ENUM ('daily', 'weekly', 'monthly', 'quarterly',
 CREATE TABLE users (
     id VARCHAR(191) PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
+    username VARCHAR(50) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     name VARCHAR(255) NOT NULL,
     company_name VARCHAR(255) NOT NULL,
+    is_verified BOOLEAN DEFAULT false NOT NULL,
     created_at TIMESTAMP DEFAULT NOW() NOT NULL,
     updated_at TIMESTAMP DEFAULT NOW() NOT NULL
 );
@@ -187,8 +189,19 @@ CREATE TABLE tevkifat_rates (
     is_active BOOLEAN DEFAULT true NOT NULL
 );
 
+-- Email verification tokens
+CREATE TABLE verification_tokens (
+    id VARCHAR(191) PRIMARY KEY,
+    user_id VARCHAR(191) NOT NULL,
+    token VARCHAR(255) NOT NULL UNIQUE,
+    expires_at TIMESTAMP NOT NULL,
+    used_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT NOW() NOT NULL
+);
+
 -- Create indexes
 CREATE INDEX email_idx ON users (email);
+CREATE INDEX username_idx ON users (username);
 CREATE INDEX code_idx ON currencies (code);
 CREATE INDEX user_id_idx ON categories (user_id);
 CREATE INDEX user_id_idx ON clients (user_id);
@@ -223,6 +236,7 @@ CREATE INDEX status_idx ON debts (status);
 CREATE INDEX type_idx ON debts (type);
 CREATE INDEX code_idx ON tevkifat_rates (code);
 CREATE INDEX is_active_idx ON tevkifat_rates (is_active);
+CREATE INDEX verification_user_id_idx ON verification_tokens (user_id);
 
 -- Foreign Key Constraints
 ALTER TABLE categories ADD CONSTRAINT fk_categories_user_id 
@@ -274,3 +288,6 @@ ALTER TABLE debts ADD CONSTRAINT fk_debts_user_id
 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 ALTER TABLE debts ADD CONSTRAINT fk_debts_currency_id 
 FOREIGN KEY (currency_id) REFERENCES currencies(id) ON DELETE RESTRICT;
+
+ALTER TABLE verification_tokens ADD CONSTRAINT fk_verification_tokens_user_id 
+FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
