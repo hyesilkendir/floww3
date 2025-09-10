@@ -65,13 +65,4 @@ if (DIALECT === 'postgres') {
 }
 
 export const db = dbInstance;
-
-// Export types and schema re-exports for services
 export type Database = typeof db;
-
-// Re-export schema based on dialect
-if (DIALECT === 'postgres') {
-  export * from './pg-schema';
-} else {
-  export * from './schema';
-}
