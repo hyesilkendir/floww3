@@ -1,8 +1,11 @@
 import { NextResponse } from 'next/server';
+export const runtime = 'nodejs';
+
 import { db } from '@/lib/db/connection';
-import { users, verificationTokens } from '@/lib/db/pg-schema';
+import { users } from '@/lib/db/pg-schema';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
+import crypto from 'node:crypto';
 
 export async function POST(req: Request) {
   try {
@@ -19,7 +22,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: 'Zorunlu alanlar eksik' }, { status: 400 });
     }
 
-    // Eşsiz kontroller
     const existingByEmail = await db.select().from(users).where(eq(users.email, email)).limit(1);
     if (existingByEmail.length > 0) {
       return NextResponse.json({ message: 'Bu e-posta zaten kayıtlı' }, { status: 409 });
@@ -29,7 +31,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: 'Bu kullanıcı adı zaten kullanımda' }, { status: 409 });
     }
 
-    // Hash
     const passwordHash = await bcrypt.hash(password, 10);
 
     const userId = crypto.randomUUID();
@@ -40,17 +41,13 @@ export async function POST(req: Request) {
       password: passwordHash,
       name,
       companyName: 'CALAF.CO',
-      isVerified: true, // İsterseniz e-posta doğrulama süreciyle false başlatabilirsiniz
+      isVerified: true,
     });
-
-    // Eğer doğrulama istenecekse örnek token üretimi (opsiyonel):
-    // const token = crypto.randomUUID();
-    // const expires = new Date(Date.now() + 1000 * 60 * 60 * 24); // 24 saat
-    // await db.insert(verificationTokens).values({ id: crypto.randomUUID(), userId, token, expiresAt: expires });
 
     return NextResponse.json({ ok: true, userId });
   } catch (error: any) {
     console.error('register error', error);
-    return NextResponse.json({ message: 'Sunucu hatası' }, { status: 500 });
+    const message = typeof error?.message === 'string' ? error.message : 'Sunucu hatası';
+    return NextResponse.json({ message }, { status: 500 });
   }
 }

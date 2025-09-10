@@ -12,47 +12,54 @@ export default function LoginPage() {
   const router = useRouter();
   const { login } = useAppStore();
 
-  const [email, setEmail] = useState('');
-  const [username, setUsername] = useState('');
-  const [name, setName] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
+  // Login form state
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
+  const [loginLoading, setLoginLoading] = useState(false);
+
+  // Register form state
+  const [regName, setRegName] = useState('');
+  const [regUsername, setRegUsername] = useState('');
+  const [regEmail, setRegEmail] = useState('');
+  const [regPassword, setRegPassword] = useState('');
+  const [regConfirm, setRegConfirm] = useState('');
+  const [regError, setRegError] = useState('');
+  const [regLoading, setRegLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError('');
+    setLoginLoading(true);
+    setLoginError('');
     try {
-      const success = await login(email, password);
+      const success = await login(loginEmail, loginPassword);
       if (success) router.push('/dashboard');
-      else setError('Giriş başarısız.');
-    } catch (err) {
-      setError('Giriş sırasında hata oluştu');
+      else setLoginError('Giriş başarısız.');
+    } catch {
+      setLoginError('Giriş sırasında hata oluştu');
     } finally {
-      setIsLoading(false);
+      setLoginLoading(false);
     }
   };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setError('');
+    setRegLoading(true);
+    setRegError('');
 
-    if (password !== confirmPassword) {
-      setError('Şifreler eşleşmiyor');
-      setIsLoading(false);
+    if (regPassword !== regConfirm) {
+      setRegError('Şifreler eşleşmiyor');
+      setRegLoading(false);
       return;
     }
-    if (password.length < 6) {
-      setError('Şifre en az 6 karakter olmalıdır');
-      setIsLoading(false);
+    if (regPassword.length < 6) {
+      setRegError('Şifre en az 6 karakter olmalıdır');
+      setRegLoading(false);
       return;
     }
-    if (!username || username.length < 3) {
-      setError('Kullanıcı adı en az 3 karakter olmalıdır');
-      setIsLoading(false);
+    if (!regUsername || regUsername.length < 3) {
+      setRegError('Kullanıcı adı en az 3 karakter olmalıdır');
+      setRegLoading(false);
       return;
     }
 
@@ -60,18 +67,18 @@ export default function LoginPage() {
       const res = await fetch('/api/auth/register?mode=create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, username, name, password }),
+        body: JSON.stringify({ email: regEmail, username: regUsername, name: regName, password: regPassword }),
       });
       if (res.ok) {
         router.push('/dashboard');
       } else {
         const data = await res.json().catch(() => ({}));
-        setError(data?.message || 'Kayıt olurken bir hata oluştu');
+        setRegError(data?.message || 'Kayıt olurken bir hata oluştu');
       }
-    } catch (err) {
-      setError('Kayıt olurken bir hata oluştu');
+    } catch {
+      setRegError('Kayıt olurken bir hata oluştu');
     } finally {
-      setIsLoading(false);
+      setRegLoading(false);
     }
   };
 
@@ -85,10 +92,10 @@ export default function LoginPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
-              <Input placeholder="E-posta" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-              <Input placeholder="Şifre" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-              {error && <div className="text-red-600 text-sm">{error}</div>}
-              <Button type="submit" disabled={isLoading}>{isLoading ? 'Yükleniyor...' : 'Giriş Yap'}</Button>
+              <Input placeholder="E-posta" type="email" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} required />
+              <Input placeholder="Şifre" type="password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} required />
+              {loginError && <div className="text-red-600 text-sm">{loginError}</div>}
+              <Button type="submit" disabled={loginLoading}>{loginLoading ? 'Yükleniyor...' : 'Giriş Yap'}</Button>
             </form>
           </CardContent>
         </Card>
@@ -100,13 +107,13 @@ export default function LoginPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleRegister} className="space-y-4">
-              <Input placeholder="Ad Soyad" value={name} onChange={(e) => setName(e.target.value)} required />
-              <Input placeholder="Kullanıcı Adı" value={username} onChange={(e) => setUsername(e.target.value)} required />
-              <Input placeholder="E-posta" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-              <Input placeholder="Şifre" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-              <Input placeholder="Şifre (Tekrar)" type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
-              {error && <div className="text-red-600 text-sm">{error}</div>}
-              <Button type="submit" disabled={isLoading}>{isLoading ? 'Yükleniyor...' : 'Kayıt Ol'}</Button>
+              <Input placeholder="Ad Soyad" value={regName} onChange={(e) => setRegName(e.target.value)} required />
+              <Input placeholder="Kullanıcı Adı" value={regUsername} onChange={(e) => setRegUsername(e.target.value)} required />
+              <Input placeholder="E-posta" type="email" value={regEmail} onChange={(e) => setRegEmail(e.target.value)} required />
+              <Input placeholder="Şifre" type="password" value={regPassword} onChange={(e) => setRegPassword(e.target.value)} required />
+              <Input placeholder="Şifre (Tekrar)" type="password" value={regConfirm} onChange={(e) => setRegConfirm(e.target.value)} required />
+              {regError && <div className="text-red-600 text-sm">{regError}</div>}
+              <Button type="submit" disabled={regLoading}>{regLoading ? 'Yükleniyor...' : 'Kayıt Ol'}</Button>
             </form>
           </CardContent>
         </Card>
