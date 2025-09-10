@@ -1,4 +1,6 @@
-.env
-node_modules
-shadcn_server/node_modules
-.next
+node_modules/
+.next/
+.env*
+*.log
+.DS_Store
+
